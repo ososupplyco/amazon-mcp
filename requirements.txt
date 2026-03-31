@@ -1,0 +1,5 @@
+fastmcp
+httpx
+boto3
+python-dotenv
+uvicorn
