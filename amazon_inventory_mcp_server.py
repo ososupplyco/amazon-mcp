@@ -241,8 +241,9 @@ class AmazonSPAPIClient:
 
     def get_fba_inventory_summaries(
         self,
-        marketplace_ids: Optional[List[str]] = None,
+        marketplace_id: Optional[str] = None,
         seller_skus: Optional[List[str]] = None,
+        seller_sku: Optional[str] = None,
         details: bool = True,
         start_date_time: Optional[str] = None,
         next_token: Optional[str] = None,
@@ -250,10 +251,12 @@ class AmazonSPAPIClient:
         params: Dict[str, Any] = {
             "details": str(details).lower(),
             "granularityType": "Marketplace",
-            "granularityId": (marketplace_ids or [self.settings.default_marketplace_id])[0],
+            "granularityId": marketplace_id or self.settings.default_marketplace_id,
         }
         if seller_skus:
             params["sellerSkus"] = ",".join(seller_skus)
+        if seller_sku:
+            params["sellerSku"] = seller_sku
         if start_date_time:
             params["startDateTime"] = start_date_time
         if next_token:
@@ -305,15 +308,17 @@ def get_awd_inventory(
 
 @mcp.tool()
 def get_fba_inventory_summaries(
-    marketplace_ids: Optional[List[str]] = None,
+    marketplace_id: Optional[str] = None,
     seller_skus: Optional[List[str]] = None,
+    seller_sku: Optional[str] = None,
     details: bool = True,
     start_date_time: Optional[str] = None,
     next_token: Optional[str] = None,
 ) -> Dict[str, Any]:
     return spapi.get_fba_inventory_summaries(
-        marketplace_ids=marketplace_ids,
+        marketplace_id=marketplace_id,
         seller_skus=seller_skus,
+        seller_sku=seller_sku,
         details=details,
         start_date_time=start_date_time,
         next_token=next_token,
