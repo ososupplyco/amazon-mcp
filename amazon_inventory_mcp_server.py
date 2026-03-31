@@ -1,6 +1,6 @@
 """
 Minimal Python MCP server that wraps Amazon Selling Partner API (SP-API)
-for inventory-report workflows.
+for inventory-report workflows, plus AWD inventory summaries.
 """
 
 from __future__ import annotations
@@ -227,6 +227,9 @@ class AmazonSPAPIClient:
             "note": "fullTextBase64 contains the full downloaded file contents as base64.",
         }
 
+    def get_awd_inventory(self) -> Dict[str, Any]:
+        return self._signed_request("GET", "/awd/2024-05-09/inventory")
+
 
 spapi = AmazonSPAPIClient(SETTINGS)
 
@@ -260,6 +263,11 @@ def get_report_status(report_id: str) -> Dict[str, Any]:
 @mcp.tool()
 def download_report_document(report_document_id: str) -> Dict[str, Any]:
     return spapi.download_report_document(report_document_id)
+
+
+@mcp.tool()
+def get_awd_inventory() -> Dict[str, Any]:
+    return spapi.get_awd_inventory()
 
 
 if __name__ == "__main__":
