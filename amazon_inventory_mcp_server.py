@@ -1,4 +1,4 @@
-\"""
+"""
 Minimal Python MCP server that wraps Amazon Selling Partner API (SP-API)
 for inventory-report workflows, plus AWD inventory summaries.
 """
