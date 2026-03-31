@@ -263,4 +263,5 @@ def download_report_document(report_document_id: str) -> Dict[str, Any]:
 
 
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http", host="0.0.0.0", port=8000, path="/mcp")
+    port = int(os.getenv("PORT", "8000"))
+    mcp.run(transport="streamable-http", host="0.0.0.0", port=port, path="/mcp")
