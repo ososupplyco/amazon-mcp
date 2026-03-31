@@ -1,4 +1,4 @@
-"""
+\"""
 Minimal Python MCP server that wraps Amazon Selling Partner API (SP-API)
 for inventory-report workflows, plus AWD inventory summaries.
 """
@@ -227,8 +227,38 @@ class AmazonSPAPIClient:
             "note": "fullTextBase64 contains the full downloaded file contents as base64.",
         }
 
-    def get_awd_inventory(self) -> Dict[str, Any]:
-        return self._signed_request("GET", "/awd/2024-05-09/inventory")
+    def get_awd_inventory(
+        self,
+        next_token: Optional[str] = None,
+        sku_prefix: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        params: Dict[str, Any] = {}
+        if next_token:
+            params["nextToken"] = next_token
+        if sku_prefix:
+            params["skuPrefix"] = sku_prefix
+        return self._signed_request("GET", "/awd/2024-05-09/inventory", params=params)
+
+    def get_fba_inventory_summaries(
+        self,
+        marketplace_ids: Optional[List[str]] = None,
+        seller_skus: Optional[List[str]] = None,
+        details: bool = True,
+        start_date_time: Optional[str] = None,
+        next_token: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        params: Dict[str, Any] = {
+            "details": str(details).lower(),
+            "granularityType": "Marketplace",
+            "granularityId": (marketplace_ids or [self.settings.default_marketplace_id])[0],
+        }
+        if seller_skus:
+            params["sellerSkus"] = ",".join(seller_skus)
+        if start_date_time:
+            params["startDateTime"] = start_date_time
+        if next_token:
+            params["nextToken"] = next_token
+        return self._signed_request("GET", "/fba/inventory/v1/summaries", params=params)
 
 
 spapi = AmazonSPAPIClient(SETTINGS)
@@ -266,8 +296,28 @@ def download_report_document(report_document_id: str) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def get_awd_inventory() -> Dict[str, Any]:
-    return spapi.get_awd_inventory()
+def get_awd_inventory(
+    next_token: Optional[str] = None,
+    sku_prefix: Optional[str] = None,
+) -> Dict[str, Any]:
+    return spapi.get_awd_inventory(next_token=next_token, sku_prefix=sku_prefix)
+
+
+@mcp.tool()
+def get_fba_inventory_summaries(
+    marketplace_ids: Optional[List[str]] = None,
+    seller_skus: Optional[List[str]] = None,
+    details: bool = True,
+    start_date_time: Optional[str] = None,
+    next_token: Optional[str] = None,
+) -> Dict[str, Any]:
+    return spapi.get_fba_inventory_summaries(
+        marketplace_ids=marketplace_ids,
+        seller_skus=seller_skus,
+        details=details,
+        start_date_time=start_date_time,
+        next_token=next_token,
+    )
 
 
 if __name__ == "__main__":
